@@ -1,13 +1,18 @@
 const express = require('express')
-const server = express()
-const PORT = 8001
-const routers = require('./src/routers')
+const app = express()
+const routers = require('./src/router')
+const db = require('./src/config/db')
 
-server.use(express.json())
-server.use(express.urlencoded({ extended: true }))
-server.use(routers)
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(routers)
 
-
-server.listen(PORT, () => {
-    console.log(`server run on port ${PORT}`);
-})
+db.connect()
+    .then(() => {
+        app.listen(8000, () => {
+            console.log('app running on port 8000')
+        })
+    })
+    .catch((e) => {
+        console.log(e)
+    })
