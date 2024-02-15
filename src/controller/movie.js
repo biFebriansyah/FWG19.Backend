@@ -17,8 +17,7 @@ ctrl.fetchBy = async (req, res) => {
             page: req.query.page || 1,
             limit: req.query.limit || 5,
             orderBy: req.query.orderBy || 'created_at',
-            search: req.query.search,
-            genre: req.query.genre
+            search: req.query.search
         }
         const result = await model.getBy(params)
         return respone(res, 200, result)

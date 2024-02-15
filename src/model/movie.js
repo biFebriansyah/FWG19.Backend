@@ -15,20 +15,20 @@ model.getData = () => {
     })
 }
 
-model.getBy = async ({ page, limit, orderBy, search, genre }) => {
+model.getBy = async ({ page, limit, orderBy, search }) => {
     try {
         let filterQuery = ''
         let orderQuery = ''
         let metaQuery = ''
         let count = 0
 
-        if (search || genre) {
+
+        if (search) {
             filterQuery += search ? escape('AND movie_name = %L', search) : ''
-            filterQuery += genre ? escape('AND LOWER(g.genre_name) = LOWER(%L)', genre) : ''
         }
 
         if (orderBy) {
-            orderQuery += escape('ORDER BY %s DESC ', orderBy)
+            orderQuery += escape('ORDER BY %s', orderBy)
         }
 
         if (page && limit) {
@@ -37,7 +37,7 @@ model.getBy = async ({ page, limit, orderBy, search, genre }) => {
         }
 
         db.query(
-            `SELECT COUNT(mv.movie_id) as "count" FROM public.movie mv JOIN public.movie_genre mg ON mg.movie_id = mv.movie_id JOIN public.genre g ON mg.genre_id = g.genre_id WHERE true ${filterQuery}`
+            `SELECT COUNT(mv.movie_id) as "count" FROM public.movie mv WHERE true ${filterQuery}`
         ).then((v) => {
             count = v.rows[0].count
         })
@@ -92,20 +92,21 @@ model.save = async ({ name, banner, release, genre }) => {
         )
 
         if (genre && genre.length > 0) {
-            genre.map(async (v) => {
-                return await pg.query(
+            for await (const v of genre) {
+                await pg.query(
                     `
                     INSERT INTO public.movie_genre
                         (movie_id, genre_id)
                     VALUES($1, $2)`,
                     [movie.rows[0].movie_id, v]
-                )
-            })
+                );
+            }
         }
 
         await pg.query('COMMIT')
         return `${movie.rowCount} data movie created`
     } catch (error) {
+        console.log(error);
         await pg.query('ROLLBACK')
         throw error
     }
