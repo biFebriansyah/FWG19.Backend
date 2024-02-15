@@ -20,10 +20,10 @@ model.getData = () => {
 
 model.getPassword = (username) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT "password" FROM public.users WHERE username = $1', [username])
+        db.query('SELECT "password", role FROM public.users WHERE username = $1', [username])
             .then((res) => {
                 if (res.rows.length) {
-                    resolve(res.rows[0].password)
+                    resolve(res.rows[0])
                 } else {
                     resolve(false)
                 }

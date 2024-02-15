@@ -29,6 +29,11 @@ ctrl.fetchBy = async (req, res) => {
 
 ctrl.save = async (req, res) => {
     try {
+
+        if (req.file !== undefined) {
+            req.body.banner = `http://localhost:8000/image/${req.file.filename}`
+        }
+
         const result = await model.save(req.body)
         return respone(res, 200, result)
     } catch (error) {
@@ -46,4 +51,5 @@ ctrl.patch = async (req, res) => {
         return respone(res, 500, error.message)
     }
 }
+
 module.exports = ctrl
